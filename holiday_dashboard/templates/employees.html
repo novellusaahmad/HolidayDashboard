@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Employees · Holiday Dashboard{% endblock %}
+{% block content %}
+<section class="page-header">
+  <h2>Employees</h2>
+  <p class="lead">Add employees and inspect their annual leave balances.</p>
+</section>
+
+<section class="layout-two-column">
+  <div class="panel">
+    <h3>Add a new employee</h3>
+    <form method="post" class="form-grid">
+      <label>
+        <span>Employee name</span>
+        <input type="text" name="name" required placeholder="Jane Doe">
+      </label>
+      <label>
+        <span>Employee ID (optional)</span>
+        <input type="text" name="employee_id" placeholder="e.g. E123">
+      </label>
+      <button type="submit" class="button">Create employee</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>Current employees</h3>
+    {% if employees %}
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Employee ID</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for employee in employees %}
+          <tr>
+            <td>{{ employee.name }}</td>
+            <td>{{ employee.id }}</td>
+            <td>{{ employee.created_at }}</td>
+            <td class="table-actions">
+              <a class="button button-secondary" href="{{ url_for('ui.employee_profile', employee_id=employee.id) }}">View balance</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <p class="empty">No employees registered yet. Use the form to add your first team member.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

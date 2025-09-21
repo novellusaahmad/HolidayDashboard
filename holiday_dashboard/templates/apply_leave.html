@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Apply for Leave · Holiday Dashboard{% endblock %}
+{% block content %}
+<section class="page-header">
+  <h2>Apply for leave</h2>
+  <p class="lead">Submit full-day or half-day requests. Carry-over balances are automatically considered until the end of March.</p>
+</section>
+
+<section class="panel">
+  <form method="post" class="form-grid">
+    <label>
+      <span>Employee</span>
+      <select name="employee_id" required>
+        <option value="">Select an employee…</option>
+        {% for employee in employees %}
+        <option value="{{ employee.id }}">{{ employee.name }} ({{ employee.id }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      <span>Date</span>
+      <input type="date" name="date" required>
+    </label>
+    <label>
+      <span>Leave type</span>
+      <select name="leave_type" required>
+        {% for key, _ in leave_types.items() %}
+        <option value="{{ key }}">{{ leave_type_labels.get(key, key) }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      <span>Requested by (optional)</span>
+      <input type="text" name="requested_by" placeholder="Employee or manager name">
+    </label>
+    <label class="full-width">
+      <span>Reason (optional)</span>
+      <textarea name="reason" rows="3" placeholder="Provide any relevant context"></textarea>
+    </label>
+    <button type="submit" class="button">Submit leave request</button>
+  </form>
+</section>
+
+{% if application %}
+<section class="panel">
+  <h3>Recently submitted</h3>
+  <p>Leave request <strong>{{ application.id }}</strong> for {{ application.date }} ({{ leave_type_labels.get(application.leave_type, application.leave_type) }}) is currently <span class="status status-{{ application.status }}">{{ application.status }}</span>.</p>
+</section>
+{% endif %}
+{% endblock %}

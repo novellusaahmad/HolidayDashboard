@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ employee.name if employee else 'Employee' }} · Holiday Dashboard{% endblock %}
+{% block content %}
+{% if error %}
+  <section class="panel">
+    <p class="empty">{{ error }}</p>
+  </section>
+{% else %}
+<section class="page-header">
+  <h2>{{ employee.name }}</h2>
+  <p class="lead">Employee ID: {{ employee.id }} · Joined {{ employee.created_at }}</p>
+</section>
+
+<section class="panel">
+  <form method="get" class="inline-form">
+    <label for="year">Leave year</label>
+    <select id="year" name="year" onchange="this.form.submit()">
+      {% for record_year in available_years %}
+      <option value="{{ record_year }}"{% if record_year == balance.year %} selected{% endif %}>{{ record_year }}</option>
+      {% endfor %}
+    </select>
+    <noscript><button type="submit" class="button button-secondary">Change</button></noscript>
+  </form>
+
+  <div class="stats-grid">
+    <div class="stat">
+      <h4>Allocation</h4>
+      <p>{{ '%.1f'|format(balance.allocation) }}</p>
+    </div>
+    <div class="stat">
+      <h4>Carry over</h4>
+      <p>{{ '%.1f'|format(balance.carry_over) }} (expires {{ balance.carry_over_expiry }})</p>
+    </div>
+    <div class="stat">
+      <h4>Remaining</h4>
+      <p>{{ '%.1f'|format(balance.remaining_current_year + balance.remaining_carry_over) }}</p>
+    </div>
+    <div class="stat">
+      <h4>Used</h4>
+      <p>{{ '%.1f'|format(balance.used_current_year + balance.used_carry_over) }}</p>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <h3>Leave applications for {{ balance.year }}</h3>
+  {% if balance.applications %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Request</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Requested by</th>
+          <th>Allocation</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for application in balance.applications | sort(attribute='created_at', reverse=True) %}
+        <tr>
+          <td>{{ application.id }}</td>
+          <td>{{ application.date }}</td>
+          <td>{{ leave_type_labels.get(application.leave_type, application.leave_type) }}</td>
+          <td><span class="status status-{{ application.status }}">{{ application.status|capitalize }}</span></td>
+          <td>{{ application.requested_by }}</td>
+          <td>
+            {% if application.allocation_breakdown %}
+              {{ '%.1f'|format(application.allocation_breakdown.carry_over) }} carry ·
+              {{ '%.1f'|format(application.allocation_breakdown.current_year) }} current
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+        {% if application.history %}
+        <tr class="history-row">
+          <td colspan="6">
+            <ul class="history">
+              {% for entry in application.history %}
+              <li>
+                {{ entry.acted_at }} · {{ entry.acted_by }} {{ entry.decision }}{% if entry.comment %} — {{ entry.comment }}{% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="empty">No leave applications recorded for this year.</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

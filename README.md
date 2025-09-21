@@ -10,6 +10,7 @@ A lightweight Flask application for managing annual leave allocations with suppo
 - Carry over up to five unused days into the next leave year, expiring on 31 March.
 - Query the detailed leave balance for each employee.
 
+
 ## Getting started
 
 1. **Install dependencies**
@@ -26,7 +27,19 @@ A lightweight Flask application for managing annual leave allocations with suppo
    flask --app app run --debug
    ```
 
-   The API will be available at `http://127.0.0.1:5000`.
+   The API will be available at `http://127.0.0.1:5000` and the web dashboard at `http://127.0.0.1:5000/dashboard`.
+
+## Using the web dashboard
+
+The HTML experience provides friendly pages for common tasks:
+
+- **Dashboard** (`/dashboard`) – overview of outstanding approvals, recent activity, and current year balances.
+- **Employees** (`/dashboard/employees`) – add team members and drill into their annual balances.
+- **Apply for leave** (`/dashboard/leave/apply`) – submit full-day, first-half, or second-half requests with optional context.
+- **Approvals** (`/dashboard/leave/applications`) – filter applications and record approval or rejection decisions.
+
+All HTML forms interact with the same underlying rules as the API endpoints, ensuring carry-over, half-day accounting, and approval tracking behave consistently whichever interface you prefer.
+
 
 ## Key API endpoints
 

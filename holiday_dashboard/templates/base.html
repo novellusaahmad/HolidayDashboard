@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Holiday Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('ui.static', filename='styles.css') }}">
+  </head>
+  <body>
+    <header class="top-bar">
+      <div class="container">
+        <h1 class="brand">Holiday Dashboard</h1>
+        <nav class="main-nav">
+          <a href="{{ url_for('ui.dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('ui.manage_employees') }}">Employees</a>
+          <a href="{{ url_for('ui.apply_leave_form') }}">Apply for Leave</a>
+          <a href="{{ url_for('ui.review_applications') }}">Approvals</a>
+        </nav>
+      </div>
+    </header>
+    <main class="container">
+      {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+      {% endif %}
+      {% if success %}
+        <div class="alert alert-success">{{ success }}</div>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="footer">
+      <div class="container">
+        <small>&copy; Leave Management</small>
+      </div>
+    </footer>
+  </body>
+</html>
