@@ -1,3 +1,4 @@
+
 """HTTP and HTML routes for the leave management service."""
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from flask import (
 
 from .leave_service import (
     LEAVE_TYPES,
+
     LeaveError,
     apply_for_leave,
     create_employee,
@@ -51,22 +53,29 @@ def _find_application(application_id: str) -> Optional[Dict[str, Any]]:
 
 
 @api_bp.errorhandler(LeaveError)
+
 def handle_leave_error(exc: LeaveError):
     response = {"error": str(exc)}
     return jsonify(response), 400
 
 
+
 @api_bp.route("/health", methods=["GET"])
+
 def health_check():
     return jsonify({"status": "ok"})
 
 
+
 @api_bp.route("/employees", methods=["GET"])
+
 def employees():
     return jsonify(sorted(list_employees(), key=lambda item: item["id"]))
 
 
+
 @api_bp.route("/employees", methods=["POST"])
+
 def add_employee():
     payload = request.get_json(force=True)
     name = payload.get("name")
@@ -77,18 +86,24 @@ def add_employee():
     return jsonify(employee), 201
 
 
+
 @api_bp.route("/employees/<employee_id>", methods=["GET"])
+
 def employee_detail(employee_id: str):
     return jsonify(get_employee(employee_id))
 
 
+
 @api_bp.route("/employees/<employee_id>/balance", methods=["GET"])
+
 def employee_balance(employee_id: str):
     year = request.args.get("year", type=int)
     return jsonify(get_balance(employee_id, year=year))
 
 
+
 @api_bp.route("/leave/apply", methods=["POST"])
+
 def apply_leave():
     payload = request.get_json(force=True)
     employee_id = payload.get("employee_id")
@@ -114,14 +129,18 @@ def apply_leave():
     return jsonify(application), 201
 
 
+
 @api_bp.route("/leave/applications", methods=["GET"])
+
 def applications():
     employee_id = request.args.get("employee_id")
     status = request.args.get("status")
     return jsonify(get_applications(employee_id=employee_id, status=status))
 
 
+
 @api_bp.route("/leave/<application_id>/decision", methods=["POST"])
+
 def leave_decision(application_id: str):
     payload = request.get_json(force=True)
     decision = payload.get("decision")
@@ -140,6 +159,7 @@ def leave_decision(application_id: str):
         comment=comment,
     )
     return jsonify(application)
+
 
 
 @ui_bp.route("/")
@@ -361,3 +381,4 @@ def review_applications():
 
 
 __all__ = ["api_bp", "ui_bp"]
+
