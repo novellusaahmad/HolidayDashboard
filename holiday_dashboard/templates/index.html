@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Holiday Dashboard{% endblock %}
+{% block content %}
+<section class="page-header">
+  <h2>Team overview</h2>
+  <p class="lead">Track annual balances, pending requests, and the most recent activity across your organisation.</p>
+</section>
+
+<section class="summary-grid">
+  <div class="summary-card">
+    <h3>Total employees</h3>
+    <p class="summary-value">{{ employees|length }}</p>
+  </div>
+  <div class="summary-card">
+    <h3>Pending approvals</h3>
+    <p class="summary-value">{{ pending|length }}</p>
+  </div>
+  <div class="summary-card">
+    <h3>Approved requests this year</h3>
+    <p class="summary-value">{{ recent_activity | selectattr('status', 'equalto', 'approved') | list | length }}</p>
+  </div>
+</section>
+
+<section class="panel">
+  <h3>Current year balances</h3>
+  {% if balances %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Remaining carry over</th>
+          <th>Remaining current year</th>
+          <th>Carry over expires</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for balance in balances %}
+        <tr>
+          <td>
+            <a href="{{ url_for('ui.employee_profile', employee_id=balance.employee_id) }}">
+              {{ balance.employee_name }}
+            </a>
+          </td>
+          <td>{{ '%.1f'|format(balance.remaining_carry_over) }}</td>
+          <td>{{ '%.1f'|format(balance.remaining_current_year) }}</td>
+          <td>{{ balance.carry_over_expiry }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="empty">No balances available yet. Add employees to get started.</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h3>Pending leave applications</h3>
+  {% if pending %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Request</th>
+          <th>Employee</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Requested by</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for application in pending %}
+        <tr>
+          <td>{{ application.id }}</td>
+          <td>{{ employee_lookup[application.employee_id].name if application.employee_id in employee_lookup else application.employee_id }}</td>
+          <td>{{ application.date }}</td>
+          <td>{{ leave_type_labels.get(application.leave_type, application.leave_type) }}</td>
+          <td>{{ application.requested_by }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p><a class="button" href="{{ url_for('ui.review_applications', status='pending') }}">Review and approve</a></p>
+  {% else %}
+    <p class="empty">No pending requests at the moment.</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h3>Recent activity</h3>
+  {% if recent_activity %}
+    <ul class="activity-feed">
+      {% for application in recent_activity %}
+      <li>
+        <strong>{{ leave_type_labels.get(application.leave_type, application.leave_type) }}</strong>
+        for
+        {{ employee_lookup[application.employee_id].name if application.employee_id in employee_lookup else application.employee_id }}
+        on {{ application.date }} —
+        <span class="status status-{{ application.status }}">{{ application.status|capitalize }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">No activity recorded yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

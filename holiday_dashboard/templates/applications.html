@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Leave applications · Holiday Dashboard{% endblock %}
+{% block content %}
+<section class="page-header">
+  <h2>Leave applications</h2>
+  <p class="lead">Filter requests and record approval decisions.</p>
+</section>
+
+<section class="panel">
+  <form method="get" class="filters">
+    <label>
+      <span>Status</span>
+      <select name="status" onchange="this.form.submit()">
+        {% for option in ['pending', 'approved', 'rejected', 'all'] %}
+        <option value="{{ option }}"{% if option == status_filter %} selected{% endif %}>{{ option|capitalize }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      <span>Employee</span>
+      <select name="employee_id" onchange="this.form.submit()">
+        <option value="">All employees</option>
+        {% for employee in employees %}
+        <option value="{{ employee.id }}"{% if selected_employee == employee.id %} selected{% endif %}>{{ employee.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <noscript><button type="submit" class="button button-secondary">Apply</button></noscript>
+  </form>
+</section>
+
+<section class="panel">
+  {% if applications %}
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Request</th>
+          <th>Employee</th>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Requested by</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for application in applications %}
+        <tr>
+          <td>{{ application.id }}</td>
+          <td>{{ employee_lookup[application.employee_id].name if application.employee_id in employee_lookup else application.employee_id }}</td>
+          <td>{{ application.date }}</td>
+          <td>{{ leave_type_labels.get(application.leave_type, application.leave_type) }}</td>
+          <td><span class="status status-{{ application.status }}">{{ application.status|capitalize }}</span></td>
+          <td>{{ application.requested_by }}</td>
+          <td class="table-actions">
+            {% if application.status == 'pending' %}
+            <form method="post" class="decision-form">
+              <input type="hidden" name="application_id" value="{{ application.id }}">
+              <label>
+                <span class="sr-only">Approver</span>
+                <input type="text" name="approver" placeholder="Approver name" required>
+              </label>
+              <label>
+                <span class="sr-only">Comment</span>
+                <input type="text" name="comment" placeholder="Optional comment">
+              </label>
+              <div class="decision-buttons">
+                <button type="submit" name="decision" value="approved" class="button">Approve</button>
+                <button type="submit" name="decision" value="rejected" class="button button-secondary">Reject</button>
+              </div>
+            </form>
+            {% else %}
+              <a class="button button-secondary" href="{{ url_for('ui.employee_profile', employee_id=application.employee_id) }}">View history</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% if application.history %}
+        <tr class="history-row">
+          <td colspan="7">
+            <ul class="history">
+              {% for entry in application.history %}
+              <li>{{ entry.acted_at }} · {{ entry.acted_by }} {{ entry.decision }}{% if entry.comment %} — {{ entry.comment }}{% endif %}</li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+        {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="empty">No applications match the selected filters.</p>
+  {% endif %}
+</section>
+{% endblock %}
